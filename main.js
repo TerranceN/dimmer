@@ -112,7 +112,16 @@ var NotificationBox = (function() {
 
   var closePopup = function() {
     notificationBox.animate({right: -220}, "medium", "swing");
-    // TODO: reset timer
+    $('#dimmer_overlay').css('opacity', 0);
+    chrome.storage.sync.set({'started': true}, function() {
+      console.log("restarting timer");
+      var startTime = Date.now(); // browser has been opened
+      chrome.storage.sync.set({'startTime': startTime}, function() {
+        // Notify that we saved start time 
+        console.log('start time saved');
+        console.log('Start Time: ' + startTime);
+      });
+    })
   }
 
   disableButton.click(function() {
@@ -160,14 +169,17 @@ $(function() {
   chrome.runtime.sendMessage({getState: true});
 
   console.log("Dimmer: Extension loaded!");
-  var checkDim = setInterval(function(){
-    console.log("checking...");
-    Dimmer.checkTimer();
-    if(startDim) {
-      console.log("Starting dim");
-      Dimmer.dim(0.5);
-      NotificationBox.notify();
-      clearInterval(checkDim);
-    }
-  }, 1000);  
+  console.log(Dimmer.state.enabled);
+  if(enabled) {
+    var checkDim = setInterval(function(){
+      console.log("checking...");
+      Dimmer.checkTimer();
+      if(startDim) {
+        console.log("Starting dim");
+        Dimmer.dim(0.5);
+        NotificationBox.notify();
+        clearInterval(checkDim);
+      }
+    }, 1000);  
+  }
 });
