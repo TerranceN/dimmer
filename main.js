@@ -1,8 +1,18 @@
+var startDim = false; 
+
 var Dimmer = (function() {
   var targetOpacity = 0;
   var currentOpacity = 0;
   var dimmerTimeoutHandle = null;
   var time = 0;
+  var startTime;
+
+
+  // gets time when browser was first opened 
+  chrome.storage.sync.get('startTime', function(obj) {
+      startTime = obj['startTime'];
+      console.log('Start Time: ' + startTime);
+  });
 
   var loadDimmerOverlay = function() {
     $('body').append($('<div id="dimmer_overlay"></div>'));
@@ -24,24 +34,40 @@ var Dimmer = (function() {
     }
   };
 
+  var checkTimer = function() {
+    var currTime = Date.now();
+    var passedTime = currTime - startTime; 
+    if(passedTime >= 60000) { // set it currently to wait for a minute; change this value to 15 minutes
+      startDim = true;
+    }
+  };
+
+
   var dim = function(t) {
     if ($('#dimmer_overlay').length == 0) {
       loadDimmerOverlay();
-      $('#dimmer_overlay').hide();
     }
+
     targetOpacity = t;
     time = Date.now();
     dimmerLoop();
   };
 
   return {
-    dim: dim
+    dim: dim,
+    checkTimer: checkTimer
   };
+
 })();
 
 $(function() {
   console.log("Dimmer: Extension loaded!");
-  window.setTimeout(function() {
-    Dimmer.dim(0.5);
-  }, 1000);
+  var checkDim = setInterval(function(){
+    console.log("checking...");
+    Dimmer.checkTimer();
+    if(startDim) {
+      Dimmer.dim(0.5);
+      clearInterval(checkDim);
+    }
+  }, 5000);  
 });
