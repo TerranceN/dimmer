@@ -25,7 +25,7 @@ chrome.storage.sync.get("started", function(data) {
 });
 
 var state = {
-  enabled: false
+  enabled: true
 }
 
 chrome.browserAction.onClicked.addListener(function(tab) {

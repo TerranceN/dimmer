@@ -28,15 +28,15 @@ var Dimmer = (function() {
   var dimmerLoop = function() {
     var diff = 1;
     var diffTime = Date.now() - time;
-    if (diffTime >= 30) {
+    if (Math.abs(diffTime) >= 30) {
       time = Date.now();
     }
-    for (var i = 0; i < diffTime / 30; i++) {
+    for (var i = 0; i < Math.abs(diffTime) / 30; i++) {
       diff = targetOpacity - currentOpacity;
       currentOpacity += diff / 10;
     }
     dimmerOverlay.css('opacity', currentOpacity);
-    if (diff > 0.05) {
+    if (Math.abs(diff) > 0.05) {
       dimmerTimeoutHandle = window.requestAnimationFrame(dimmerLoop);
     }
   };
@@ -111,12 +111,12 @@ var NotificationBox = (function() {
 
   var closePopup = function() {
     notificationBox.animate({right: -220}, "medium", "swing");
-    $('#dimmer_overlay').css('opacity', 0);
     chrome.storage.sync.set({'started': true}, function() {
       console.log("restarting timer");
       var startTime = Date.now(); // browser has been opened
       chrome.storage.sync.set({'startTime': startTime}, function() {
         // Notify that we saved start time 
+        Dimmer.dim(0.0);
         console.log('start time saved');
         console.log('Start Time: ' + startTime);
       });
@@ -167,18 +167,41 @@ $(function() {
   //Request the current state to initialise the script
   chrome.runtime.sendMessage({getState: true});
 
-  console.log("Dimmer: Extension loaded!");
-  console.log(Dimmer.state.enabled);
-  if(enabled) {
-    var checkDim = setInterval(function(){
-      console.log("checking...");
-      Dimmer.checkTimer();
-      if(startDim) {
-        console.log("Starting dim");
-        Dimmer.dim(0.5);
-        NotificationBox.notify();
-        clearInterval(checkDim);
-      }
-    }, 1000);  
+  var maxTime = 60 * 20; // 20 minutes
+  //var maxTime = 10;
+
+  var dimAmount = function(seconds) {
+    var maxDim = 0.5;
+    var x = (seconds/(0.75*maxTime));
+    return maxDim * Math.min(1.0, x*x);
   }
+
+  var dimmerLoop = function() {
+    var startTime = 0;
+    // gets time when browser was first opened 
+    chrome.storage.sync.get('startTime', function(obj) {
+      startTime = obj['startTime'];
+      var timeDiff = Date.now() - startTime;
+      var diffSeconds = Math.abs(timeDiff / 1000);
+      var dimA = dimAmount(diffSeconds);
+      Dimmer.dim(dimA);
+      if (diffSeconds > maxTime) {
+        NotificationBox.notify();
+      }
+    });
+    setTimeout(dimmerLoop, 250);
+  }
+
+  console.log("Dimmer: Extension loaded!");
+  dimmerLoop();
+  //var checkDim = setInterval(function(){
+  //  console.log("checking...");
+  //  Dimmer.checkTimer();
+  //  if(startDim) {
+  //    console.log("Starting dim");
+  //    Dimmer.dim(0.5);
+  //    NotificationBox.notify();
+  //    clearInterval(checkDim);
+  //  }
+  //}, 1000);  
 });
