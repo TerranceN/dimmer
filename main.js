@@ -66,7 +66,6 @@ var Dimmer = (function() {
       loadDimmerOverlay();
     }
     enabled ? dimmerOverlay.show() : dimmerOverlay.hide();
-    console.log("Enabled " + enabled);
   }
 
   return {
@@ -110,8 +109,8 @@ var NotificationBox = (function() {
   };
 
   var closePopup = function() {
+    console.log("Closing popup");
     notificationBox.animate({right: -220}, "medium", "swing");
-    $('#dimmer_overlay').css('opacity', 0);
     chrome.storage.sync.set({'started': true}, function() {
       console.log("restarting timer");
       var startTime = Date.now(); // browser has been opened
@@ -119,6 +118,7 @@ var NotificationBox = (function() {
         // Notify that we saved start time 
         console.log('start time saved');
         console.log('Start Time: ' + startTime);
+        $('#dimmer_overlay').css('opacity', 0);
       });
     })
   }
@@ -168,7 +168,6 @@ $(function() {
   chrome.runtime.sendMessage({getState: true});
 
   console.log("Dimmer: Extension loaded!");
-  console.log(Dimmer.state.enabled);
   if(enabled) {
     var checkDim = setInterval(function(){
       console.log("checking...");
