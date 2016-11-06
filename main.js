@@ -26,7 +26,6 @@ var Dimmer = (function() {
   };
 
   var dimmerLoop = function() {
-    console.log("in dimmer loop");
     var diff = 1;
     var diffTime = Date.now() - time;
     if (diffTime >= 30) {
