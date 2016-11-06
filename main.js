@@ -1,3 +1,7 @@
+var state = {
+  enabled: false
+};
+
 var Dimmer = (function() {
   var targetOpacity = 0;
   var currentOpacity = 0;
@@ -48,6 +52,68 @@ var Dimmer = (function() {
   };
 })();
 
+var NotificationBox = (function() {
+  var notificationBox = $('<div id="notification_box"></div>');
+
+  var container = $('<div class="notification_box_container"></div>');
+
+  var page1 = $('<div class="page" id="page1"></div>');
+  var dismissButton = $('<input type="button" value="Dismiss"></input>');
+  var disableButton = $('<input type="button" value="Snooze for..."></input>');
+
+  var page2 = $('<div class="page" id="page2"></div>');
+  var oneHour = $('<input type="button" value="1 Hour"></input>');
+  var fourHours = $('<input type="button" value="4 Hours"></input>');
+
+  var loadNotificationBox = function() {
+    $('body').append(notificationBox);
+    page1.append(dismissButton);
+    page1.append(disableButton);
+    container.append(page1);
+    page2.append(oneHour);
+    page2.append(fourHours);
+    container.append(page2);
+    notificationBox.append('<p>Stare away from the screen for 20 seconds.</p>');
+    notificationBox.append(container);
+  }
+
+  var notify = function() {
+    if ($('#notification_box').length == 0) {
+      loadNotificationBox();
+    }
+    notificationBox.css('left', '-' + (notificationBox.css('width') + 20));
+    notificationBox.animate({right: 20}, "medium", "swing");
+  };
+
+  var closePopup = function() {
+    notificationBox.animate({right: -220}, "medium", "swing");
+    // TODO: reset timer
+  }
+
+  disableButton.click(function() {
+    page1.css('left', 0);
+    page2.css('left', 0);
+    page1.animate({left: -200}, "medium", "swing");
+    page2.animate({left: -200}, "medium", "swing");
+  });
+
+  dismissButton.click(closePopup);
+  oneHour.click(closePopup);
+  fourHours.click(closePopup);
+
+  var setEnabled = function(enabled) {
+    if ($('#notification_box').length == 0) {
+      loadNotificationBox();
+    }
+    enabled ? notificationBox.show() : notificationBox.hide();
+  }
+
+  return {
+    notify: notify,
+    setEnabled: setEnabled
+  };
+})();
+
 $(function() {
   //Message will be received at each update of state in the background page
   chrome.runtime.onMessage.addListener(function(message, sender, callback) {
@@ -61,6 +127,7 @@ $(function() {
       //Do actions for the right state
       //You also can use if statements here... Switch are more used when there is lots of states
       Dimmer.setEnabled(message.state.enabled);
+      NotificationBox.setEnabled(message.state.enabled);
   })
 
   //Request the current state to initialise the script
@@ -69,5 +136,6 @@ $(function() {
   console.log("Dimmer: Extension loaded!");
   window.setTimeout(function() {
     Dimmer.dim(0.5);
+    NotificationBox.notify();
   }, 1000);
 });
