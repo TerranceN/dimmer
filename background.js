@@ -26,6 +26,10 @@ chrome.runtime.onMessage.addListener(function(message, sender, callback) {
       });
     }
     if (message.getState) {
-      chrome.tabs.sendMessage(sender.tab.id, {state : state});
+      if (sender.tab) {
+        chrome.tabs.sendMessage(sender.tab.id, {state : state});
+      } else {
+        chrome.runtime.sendMessage({state : state});
+      }
     }
 });
