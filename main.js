@@ -26,6 +26,7 @@ var Dimmer = (function() {
   };
 
   var dimmerLoop = function() {
+    console.log("in dimmer loop");
     var diff = 1;
     var diffTime = Date.now() - time;
     if (diffTime >= 30) {
@@ -44,7 +45,7 @@ var Dimmer = (function() {
   var checkTimer = function() {
     var currTime = Date.now();
     var passedTime = currTime - startTime; 
-    if(passedTime >= 60000) { // set it currently to wait for a minute; change this value to 15 minutes
+    if(passedTime >= 5000) { // set it currently to wait for a minute; change this value to 15 minutes
       startDim = true;
     }
   };
@@ -61,15 +62,17 @@ var Dimmer = (function() {
   };
 
   var setEnabled = function(enabled) {
+
     if ($('#dimmer_overlay').length == 0) {
       loadDimmerOverlay();
     }
     enabled ? dimmerOverlay.show() : dimmerOverlay.hide();
+    console.log("Enabled " + enabled);
   }
 
   return {
     dim: dim,
-    checkTimer: checkTimer
+    checkTimer: checkTimer,
     setEnabled: setEnabled
   };
 })();
@@ -143,7 +146,7 @@ $(function() {
       console.log(message);
       //Check the message is valid
       if(message.state == null) {
-          console.log("Unreconized message");
+          console.log("Unrecognized message");
           return;
       }
 
@@ -161,6 +164,7 @@ $(function() {
     console.log("checking...");
     Dimmer.checkTimer();
     if(startDim) {
+      console.log("Starting dim");
       Dimmer.dim(0.5);
       NotificationBox.notify();
       clearInterval(checkDim);

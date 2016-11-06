@@ -1,4 +1,4 @@
-$(document).ready(function() {
+// $(document).ready(function() {
 	chrome.storage.sync.clear(function() {
 		console.log("cleared storage");
 	});
@@ -25,7 +25,7 @@ $(document).ready(function() {
 		}
 	});
 	
-});
+// });
 
 var state = {
   enabled: false
