@@ -4,8 +4,45 @@
   height: 100%;
   top: 0;
   left: 0;
-  z-index: 9999999999;
+  z-index: 9999999998;
   pointer-events: none;
   background-color: black;
   opacity: 0;
+}
+
+#notification_box {
+  position: fixed;
+  top: 20px;
+  right: -220px;
+  z-index: 9999999999;
+  width: 200px;
+  height: 100px;
+  background-color: white;
+  border: 1px solid #CCC;
+  border-radius: 5px;
+  overflow: hidden;
+}
+
+#notification_box p {
+  padding: 5px;
+}
+
+#notification_box .notification_box_container {
+  width: 9999px;
+}
+
+#notification_box .page {
+  display: inline-block;
+  width: 190px;
+  margin: 7px;
+  position: relative;
+}
+
+#notification_box .page input {
+  padding:5px;
+  width: 90px;
+}
+
+#notification_box .page input + input {
+  margin-left: 7px;
 }
